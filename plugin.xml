@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="floobits-plugin.commands.category"
+            name="Floobits">
+      </category>
+      <command
+            categoryId="floobits-plugin.commands.category"
+            id="floobits-plugin.commands.start"
+            name="Start">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="floobitsplugin.handlers.StartHandler"
+            commandId="floobits-plugin.commands.start">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="floobits-plugin.commands.start"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="floobits-plugin.menus.floobits-main"
+               label="Floobits"
+               mnemonic="M">
+            <command
+                  commandId="floobits-plugin.commands.start"
+                  id="floobits-plugin.menus.floobits-main"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="floobits-plugin.toolbars.sampleToolbar">
+            <command
+                  commandId="floobits-plugin.commands.start"
+                  icon="icons/sample.gif"
+                  id="floobits-plugin.commands.start"
+                  tooltip="Say hello world">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>
