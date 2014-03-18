@@ -5,7 +5,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.jface.dialogs.MessageDialog;
+import floobits_plugin.Activator;
 
 /**
  * Our sample handler extends AbstractHandler, an IHandler base class.
@@ -25,10 +25,12 @@ public class StartHandler extends AbstractHandler {
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		MessageDialog.openInformation(
-				window.getShell(),
-				"floobits-plugin",
-				"Hello, Eclipse world");
+		Activator.joinWorkspace(window);
+//		MessageDialog.openInformation(
+//				window.getShell(),
+//				"floobits-plugin",
+//				"Hello, Eclipse world");
+		
 		return null;
 	}
 }
