@@ -16,7 +16,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="floobitsplugin.handlers.StartHandler"
+            class="floobits_plugin.StartHandler"
             commandId="floobits-plugin.commands.start">
       </handler>
    </extension>
