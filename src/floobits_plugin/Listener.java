@@ -11,7 +11,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -33,9 +35,32 @@ import org.eclipse.ui.texteditor.ITextEditor;
     
 
 public class Listener implements IResourceChangeListener, IPartListener2 {
+	private IDocumentListener documentListener = new IDocumentListener() {
+
+		@Override
+		public void documentAboutToBeChanged(DocumentEvent event) {
+			Activator.log(String.format("%s, ", event));
+			
+		}
+
+		@Override
+		public void documentChanged(DocumentEvent event) {
+			Activator.log(String.format("%s, ", event));	
+		}
+	};
+	
 	public void start(IWorkbenchWindow window, IWorkspace iWorkspace) {
 		iWorkspace.addResourceChangeListener(this);
 		window.getPartService().addPartListener(this);
+		IWorkbenchPage[] pages = window.getPages();
+		for (IWorkbenchPage page : pages) {
+			IEditorReference[] editorReferences = page.getEditorReferences();
+			for (IEditorReference editorReference : editorReferences) {
+				IEditorPart editor = editorReference.getEditor(false);
+				IDocument document = getDocument((IEditorPart)editor);
+				if (document != null) document.addDocumentListener(documentListener);
+			}
+		}
 	}
 	
 	public void stop(IWorkspace iWorkspace) throws Exception {
@@ -88,8 +113,13 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 
 	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
+		IWorkbenchPart part = partRef.getPart(false);
 		
+		if (!(part instanceof IEditorPart)) {
+			return;
+		}
+		IDocument document = getDocument((IEditorPart)part);
+		if (document != null) document.removeDocumentListener(documentListener);	
 	}
 
 	@Override
@@ -107,27 +137,17 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 		if (!(part instanceof IEditorPart)) {
 			return;
 		}
-		IEditorPart editor  = (IEditorPart)part;
-		
-		IDocumentProvider documentProvider = ((ITextEditor) editor.getAdapter(ITextEditor.class)).getDocumentProvider();
-		IDocumentExtension4 document= (IDocumentExtension4) documentProvider.getDocument(editor.getEditorInput());
-
-		((IDocument) document).addDocumentListener(new IDocumentListener() {
-
-			@Override
-			public void documentAboutToBeChanged(DocumentEvent event) {
-				Activator.log(String.format("%s, ", event));
-				
-			}
-
-			@Override
-			public void documentChanged(DocumentEvent event) {
-				Activator.log(String.format("%s, ", event));	
-			}
-		});
+		IDocument document = getDocument((IEditorPart)part);
+		if (document != null) document.addDocumentListener(documentListener);
 		
 	}
 
+	private IDocument getDocument(IEditorPart editor) {
+		if (editor == null) return null;
+		IDocumentProvider documentProvider = ((ITextEditor) editor.getAdapter(ITextEditor.class)).getDocumentProvider();
+		return documentProvider.getDocument(editor.getEditorInput());
+	}
+	
 	@Override
 	public void partHidden(IWorkbenchPartReference partRef) {
 		// TODO Auto-generated method stub
