@@ -1,4 +1,4 @@
-package floobits_plugin;
+package floobits;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

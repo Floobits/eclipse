@@ -1,4 +1,4 @@
-package floobits_plugin;
+package floobits;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

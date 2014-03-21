@@ -3,12 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: floobits-plugin
 Bundle-SymbolicName: floobits-plugin;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: floobits_plugin.Activator
+Bundle-Activator: floobits.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.8.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: floobits_plugin
+Export-Package: floobits
 Eclipse-AutoStart: true
 Bundle-ActivationPolicy: lazy;exclude:="floobits-plugin"
 Import-Package: org.eclipse.jface.text,
