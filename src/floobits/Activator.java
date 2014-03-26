@@ -4,6 +4,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleContext;
@@ -60,15 +61,7 @@ public class Activator extends AbstractUIPlugin {
 		return plugin;
 	}
 	
-	public void _log(int severity, String msg) {
-		 getLog().log(new Status(severity, PLUGIN_ID, Status.OK, msg, null));
-	}
-	
-	public static void log(String msg) {
-		slef._log(IStatus.OK, msg);
-	}
-	
-	public static void joinWorkspace(IWorkbenchWindow window) {
-		listener.start(window, Activator.iWorkspace);
+	public static void _log(int severity, String msg, int status) {
+		slef.getLog().log(new Status(severity, PLUGIN_ID, status, msg, null));
 	}
 }
