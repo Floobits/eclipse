@@ -9,6 +9,12 @@ import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.options.newEditor.OptionsEditorDialog;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.roots.ui.configuration.ProjectStructureConfigurable;
 import com.intellij.openapi.vfs.*;
 import com.intellij.ui.JBColor;
 import floobits.FlooContext;
@@ -36,6 +42,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class FlooHandler extends BaseHandler {
+
+    private final Project project;
 
     class QueuedAction {
         public final Buf buf;
@@ -112,7 +120,7 @@ public class FlooHandler extends BaseHandler {
         }
     }
 
-    public FlooHandler (FlooContext context, FlooUrl flooUrl, boolean shouldUpload) {
+    public FlooHandler (final FlooContext context, FlooUrl flooUrl, boolean shouldUpload) {
         super(context);
         url = flooUrl;
         this.shouldUpload = shouldUpload;
@@ -130,6 +138,24 @@ public class FlooHandler extends BaseHandler {
                 }
             }
         };
+        this.project = context.project;
+        if (ProjectRootManager.getInstance(this.project).getProjectSdk() == null) {
+            context.setTimeout(0, new Runnable() {
+                @Override
+                public void run() {
+                    ThreadSafe.read(new Runnable() {
+                        @Override
+                        public void run() {
+                            context.errorMessage("Select a SDK for the project");
+                            ShowSettingsUtil.getInstance().editConfigurable(project, OptionsEditorDialog.DIMENSION_KEY, ProjectStructureConfigurable.getInstance(project));
+                            if (ProjectRootManager.getInstance(project).getProjectSdk() == null) {
+                                context.errorMessage("You must select a SDK for the project before Intellij will let you do anything sane.");
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
     public void go() {
@@ -248,7 +274,9 @@ public class FlooHandler extends BaseHandler {
                 if (conflictedPaths.size() <= 0) {
                     return;
                 }
-                final String ideaPath = context.project.getProjectFile().getParent().getPath();
+
+                // XXXX: If this name ever changes, we are screwed
+                final String ideaPath = FilenameUtils.concat(Constants.baseDir, ".idea");
                 String[] conflictedPathsArray = conflictedPaths.toArray(new String[conflictedPaths.size()]);
                 ResolveConflictsDialogWrapper dialog = new ResolveConflictsDialogWrapper(
                         new RunLater<Void>() {
@@ -736,8 +764,8 @@ public class FlooHandler extends BaseHandler {
         isJoined = false;
         String reason = jsonObject.get("reason").getAsString();
         if (reason != null) {
-            context.errorMessage(reason);
-            context.flashMessage(reason);
+            context.errorMessage(String.format("You have been disconnected from the workspace because %s", reason));
+            context.flashMessage("You have been disconnected from the workspace.");
         } else {
             context.statusMessage("You have left the workspace", false);
         }
@@ -836,6 +864,7 @@ public class FlooHandler extends BaseHandler {
         }
         Buf buf = this.get_buf_by_path(current);
         if (Buf.isBad(buf)) {
+            context.errorMessage(String.format("The file %s is not shared!", current));
             return;
         }
         ArrayList<ArrayList<Integer>> ranges = new ArrayList<ArrayList<Integer>>();
