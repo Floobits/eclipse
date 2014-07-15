@@ -19,6 +19,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import floobits.utilities.Flog;
+
 //class EditorListener implements ISelectionListener, IFileBufferListener, IDocumentListener, IPartListener2 {
 //    protected BytecodeOutlineView view;
 //
@@ -38,13 +40,13 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 
 		@Override
 		public void documentAboutToBeChanged(DocumentEvent event) {
-			Activator.log(String.format("%s, ", event));
+			Flog.log(String.format("%s, ", event));
 			
 		}
 
 		@Override
 		public void documentChanged(DocumentEvent event) {
-			Activator.log(String.format("%s, ", event));	
+			Flog.log(String.format("%s, ", event));	
 		}
 	};
 	

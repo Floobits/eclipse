@@ -24,7 +24,7 @@ public class StartHandler extends AbstractHandler {
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		Activator.joinWorkspace(window);
+//		Activator.joinWorkspace(window);
 //		MessageDialog.openInformation(
 //				window.getShell(),
 //				"floobits-plugin",
