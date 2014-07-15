@@ -21,15 +21,15 @@ public class Flog {
     public static void info (String s, Object... args) {
     	Activator._log(IStatus.INFO, String.format(s, args), Status.INFO);
     }
-    public static void statusMessage(String message) {
+    public static void statusMessage(String message, Object o) {
         log(message);
     }
 
-    public static void errorMessage(String message) {
+    public static void errorMessage(String message, Object o) {
         warn(message);
     }
 
-    public static void flashMessage(final String message) {
+    public static void flashMessage(final String message, Object o) {
     	log(message);
     }
 }
