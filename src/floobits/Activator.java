@@ -6,8 +6,13 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
+
+import floobits.common.Bootstrap;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -30,6 +35,9 @@ public class Activator extends AbstractUIPlugin {
 	public Activator() {
 		iWorkspace = ResourcesPlugin.getWorkspace();
 		slef = this;
+		Bundle bundle = Platform.getBundle("org.nodeeclipse.ui");
+		Version version = bundle.getVersion();
+		Bootstrap.bootstrap("Eclipse", Integer.toString(version.getMajor()), Integer.toString(version.getMinor()), "0");
 	}
 
 	/*
