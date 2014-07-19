@@ -150,7 +150,8 @@ public class API {
         return apiRequest(new GetMethod(String.format("/api/workspace/%s/%s", f.owner, f.workspace)), context, f.host);
     }
 
-    static public HttpMethod apiRequest(HttpMethod method, IContext context, String host) throws IOException, IllegalArgumentException {
+    @SuppressWarnings("deprecation")
+	static public HttpMethod apiRequest(HttpMethod method, IContext context, String host) throws IOException, IllegalArgumentException {
         Flog.info("Sending an API request");
         final HttpClient client = new HttpClient();
         // NOTE: we cant tell java to follow redirects because they can fail.

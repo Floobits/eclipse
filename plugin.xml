@@ -4,26 +4,26 @@
    <extension
          point="org.eclipse.ui.commands">
       <category
-            id="floobits-plugin.commands.category"
+            id="floobits.commands.category"
             name="Floobits">
       </category>
       <command
-            categoryId="floobits-plugin.commands.category"
-            id="floobits-plugin.commands.start"
+            categoryId="floobits.commands.category"
+            id="floobits.commands.start"
             name="Start">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="floobits_plugin.StartHandler"
-            commandId="floobits-plugin.commands.start">
+            class="floobits.StartHandler"
+            commandId="floobits.commands.start">
       </handler>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="floobits-plugin.commands.start"
+            commandId="floobits.commands.start"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+6">
@@ -34,12 +34,12 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               id="floobits-plugin.menus.floobits-main"
+               id="floobits.menus.floobits-main"
                label="Floobits"
                mnemonic="M">
             <command
-                  commandId="floobits-plugin.commands.start"
-                  id="floobits-plugin.menus.floobits-main"
+                  commandId="floobits.commands.start"
+                  id="floobits.menus.floobits-main"
                   mnemonic="S">
             </command>
          </menu>
@@ -47,11 +47,11 @@
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
-               id="floobits-plugin.toolbars.sampleToolbar">
+               id="floobits.toolbars.sampleToolbar">
             <command
-                  commandId="floobits-plugin.commands.start"
+                  commandId="floobits.commands.start"
                   icon="icons/sample.gif"
-                  id="floobits-plugin.commands.start"
+                  id="floobits.commands.start"
                   tooltip="Say hello world">
             </command>
          </toolbar>
