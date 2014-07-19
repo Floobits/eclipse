@@ -5,11 +5,13 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
 import floobits.common.Bootstrap;
@@ -35,9 +37,12 @@ public class Activator extends AbstractUIPlugin {
 	public Activator() {
 		iWorkspace = ResourcesPlugin.getWorkspace();
 		slef = this;
-		Bundle bundle = Platform.getBundle("org.nodeeclipse.ui");
-		Version version = bundle.getVersion();
-		Bootstrap.bootstrap("Eclipse", Integer.toString(version.getMajor()), Integer.toString(version.getMinor()), "0");
+		IProduct product = Platform.getProduct();
+//		Bundle eclipse = Platform.getBundle("org.eclipse.platform_ plugin");
+//		Version ecliVersion = eclipse.getVersion();
+		Version flooVersion = FrameworkUtil.getBundle(getClass()).getVersion();
+		Version version = product.getDefiningBundle().getVersion();
+		Bootstrap.bootstrap(product.getName(), Integer.toString(version.getMajor()), Integer.toString(version.getMinor()), String.format("%s-%s", flooVersion.getMajor(), flooVersion.getMinor()));
 	}
 
 	/*
