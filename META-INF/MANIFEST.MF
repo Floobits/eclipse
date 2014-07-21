@@ -6,7 +6,9 @@ Bundle-Version: 0.1.0
 Bundle-Activator: floobits.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.core.resources;bundle-version="3.8.1"
+ org.eclipse.core.resources;bundle-version="3.8.1",
+ org.eclipse.core.filebuffers,
+ org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: floobits
 Eclipse-AutoStart: true
