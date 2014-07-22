@@ -4,16 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import floobits.common.interfaces.IContext;
 import floobits.common.interfaces.IFile;
 import floobits.utilities.Flog;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
@@ -21,7 +16,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 public class FileImpl extends IFile {
 	public IFileStore file;
@@ -37,20 +32,40 @@ public class FileImpl extends IFile {
 	public IFileInfo getInfo() {
 		return file.fetchInfo();
 	}
-
+	
+	public FactoryImpl getFactory() {
+		return ((FactoryImpl)context.iFactory);
+	}
+	
 	@Override
 	public String getPath() {
-		return file.fetchInfo().toString();
+		File localFile;
+		try {
+			localFile = file.toLocalFile(0, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
+		if (localFile == null) {
+			return null;
+		}
+		return localFile.getPath();
 	}
 
 	@Override
 	public boolean rename(Object obj, String name) {
-//		// TODO Auto-generated method stub
-//		IPath path = file.getLocation();
-//		path.uptoSegment(0).append(name);
-//		file.getFileStore().g
-//		file.getFileStore().move(path., 0, null)
-		return false;
+		Path path = new Path(getPath());
+		path.removeLastSegments(1);
+		path.append(name);
+		IFileStore newStore = getFactory().lfs.getStore(path);
+		try {
+			file.move(newStore, EFS.OVERWRITE, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return false;
+		}
+		file = newStore;
+		return true;
 	}
 
 	@Override
@@ -70,9 +85,18 @@ public class FileImpl extends IFile {
 	}
 
 	@Override
-	public boolean move(Object obj, IFile d) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean move(Object obj, IFile parent) {
+		Path path = new Path(parent.getPath());
+		path.append(file.getName());
+		IFileStore newStore = getFactory().lfs.getStore(path);
+		try {
+			file.move(newStore, EFS.OVERWRITE, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return false;
+		}
+		file = newStore;
+		return true;
 	}
 
 	@Override
@@ -196,7 +220,6 @@ public class FileImpl extends IFile {
 
 	@Override
 	public InputStream getInputStream() {
-		// TODO Auto-generated method stub
 		try {
 			return file.openInputStream(0, null);
 		} catch (CoreException e) {
