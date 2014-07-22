@@ -102,7 +102,6 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
 		
 	}
 

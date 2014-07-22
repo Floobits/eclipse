@@ -1,10 +1,15 @@
 package floobits.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import floobits.common.interfaces.IContext;
 import floobits.common.interfaces.IFile;
 import floobits.utilities.Flog;
 
@@ -13,22 +18,29 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 public class FileImpl extends IFile {
-	public org.eclipse.core.resources.IFile file;
+	public IFileStore file;
 	protected IFileBuffer buffer;
+	private IContext context;
 
-	public FileImpl(org.eclipse.core.resources.IFile file) {
+	public FileImpl(IContext context, IFileStore file) {
 		this.file = file;
+		this.context = context;
 		FileBuffers.getTextFileBufferManager();
+	}
+	
+	public IFileInfo getInfo() {
+		return file.fetchInfo();
 	}
 
 	@Override
 	public String getPath() {
-		// TODO Auto-generated method stub
-		return file.getLocation().toString();
+		return file.fetchInfo().toString();
 	}
 
 	@Override
@@ -43,14 +55,18 @@ public class FileImpl extends IFile {
 
 	@Override
 	public IFile makeFile(String name) {
-		IPath path = file.getLocation().append(name);
+		IFileStore child;
 		try {
-			, 0, null);
-		} catch (CoreException e) {
+			file.mkdir(0, null);
+			child = file.getChild(name);
+			File localFile = child.toLocalFile(0, null);
+			localFile.createNewFile();
+		} catch (Throwable e) {
 			Flog.warn(e);
 			return null;
 		}
-		return true;
+		return new FileImpl(context, child);
+
 	}
 
 	@Override
@@ -62,7 +78,7 @@ public class FileImpl extends IFile {
 	@Override
 	public boolean delete(Object obj) {
 		try {
-			file.delete(true, null);
+			file.delete(0, null);
 		} catch (CoreException e) {
 			Flog.warn(e);
 			return false;
@@ -72,8 +88,19 @@ public class FileImpl extends IFile {
 
 	@Override
 	public IFile[] getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		IFileStore[] childStores;
+		ArrayList<IFile> list = new ArrayList<>();
+		try {
+			childStores = file.childStores(0, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return (IFile[]) list.toArray();
+		}
+		for (IFileStore fileStore : childStores) {
+			FileImpl fileImpl = new FileImpl(context, fileStore);
+			list.add(fileImpl);
+		}
+		return (IFile[]) list.toArray();
 	}
 
 	@Override
@@ -84,42 +111,46 @@ public class FileImpl extends IFile {
 
 	@Override
 	public long getLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		IFileInfo info = getInfo();
+		return info.getLength();
 	}
 
 	@Override
 	public boolean exists() {
-		return file.exists();
+		try {
+			return file.toLocalFile(0, null).exists();
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			return false;
+		}
 	}
 
 	@Override
 	public boolean isDirectory() {
-		// TODO Auto-generated method stub
-		return file.get;
+		IFileInfo info = getInfo();
+		return info.isDirectory();
 	}
 
 	@Override
 	public boolean isSpecial() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isSymLink() {
-		return file.isLinked();
+		return getInfo().getAttribute(EFS.ATTRIBUTE_LINK_TARGET);
 	}
 
 	@Override
 	public boolean isValid() {
-		return !file.isVirtual() && !file.isPhantom();
+		return true;
 	}
 
 	@Override
 	public byte[] getBytes() {
 		InputStream in;
 		try {
-			in = file.getContents();
+			in = file.openInputStream(0, null);
 		} catch (CoreException e) {
 			Flog.warn(e);
 			return null;
@@ -138,8 +169,8 @@ public class FileImpl extends IFile {
 	public boolean setBytes(byte[] bytes) {
 		ByteArrayInputStream io = new ByteArrayInputStream(bytes);
 		try {
-			file.setContents(io, true, true, null);
-		} catch (CoreException e) {
+			IOUtils.copy(io, file.openOutputStream(0, null));
+		} catch (Throwable e) {
 			Flog.warn(e);
 			return false;
 		}
@@ -148,26 +179,26 @@ public class FileImpl extends IFile {
 
 	@Override
 	public void refresh() {
-		try {
-			file.refreshLocal(50, null);
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			Flog.warn(e);
-		}
 		
 	}
 
 	@Override
 	public boolean createDirectories(String dir) {
-		// TODO Auto-generated method stub
-		return false;
+		IFileStore child = file.getChild(dir);
+		try {
+			child.mkdir(EFS.NONE, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	public InputStream getInputStream() {
 		// TODO Auto-generated method stub
 		try {
-			return file.getContents();
+			return file.openInputStream(0, null);
 		} catch (CoreException e) {
 			Flog.warn(e);
 		}
