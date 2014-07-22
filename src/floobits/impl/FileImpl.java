@@ -1,5 +1,6 @@
 package floobits.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,16 +10,19 @@ import floobits.utilities.Flog;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 public class FileImpl extends IFile {
-	public IFileBuffer file;
+	public org.eclipse.core.resources.IFile file;
+	protected IFileBuffer buffer;
 
-	public FileImpl(IFileBuffer file) {
+	public FileImpl(org.eclipse.core.resources.IFile file) {
 		this.file = file;
+		FileBuffers.getTextFileBufferManager();
 	}
 
 	@Override
@@ -39,8 +43,14 @@ public class FileImpl extends IFile {
 
 	@Override
 	public IFile makeFile(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		IPath path = file.getLocation().append(name);
+		try {
+			, 0, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
+		return true;
 	}
 
 	@Override
@@ -51,8 +61,13 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean delete(Object obj) {
-		// TODO Auto-generated method stub
-		return false;
+		try {
+			file.delete(true, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -64,7 +79,7 @@ public class FileImpl extends IFile {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return null;
+		return file.getName();
 	}
 
 	@Override
@@ -75,14 +90,13 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean exists() {
-		// TODO Auto-generated method stub
-		return false;
+		return file.exists();
 	}
 
 	@Override
 	public boolean isDirectory() {
 		// TODO Auto-generated method stub
-		return false;
+		return file.get;
 	}
 
 	@Override
@@ -93,21 +107,19 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean isSymLink() {
-		// TODO Auto-generated method stub
-		return false;
+		return file.isLinked();
 	}
 
 	@Override
 	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
+		return !file.isVirtual() && !file.isPhantom();
 	}
 
 	@Override
 	public byte[] getBytes() {
 		InputStream in;
 		try {
-			in = file.getFileStore().openInputStream(EFS.NONE, null);
+			in = file.getContents();
 		} catch (CoreException e) {
 			Flog.warn(e);
 			return null;
@@ -124,16 +136,10 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean setBytes(byte[] bytes) {
-		OutputStream out;
+		ByteArrayInputStream io = new ByteArrayInputStream(bytes);
 		try {
-			out = file.getFileStore().openOutputStream(EFS.NONE, null);
+			file.setContents(io, true, true, null);
 		} catch (CoreException e) {
-			Flog.warn(e);
-			return false;
-		}
-		try {
-			IOUtils.write(bytes, out);
-		} catch (IOException e) {
 			Flog.warn(e);
 			return false;
 		}
@@ -142,7 +148,12 @@ public class FileImpl extends IFile {
 
 	@Override
 	public void refresh() {
-		// TODO Auto-generated method stub
+		try {
+			file.refreshLocal(50, null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			Flog.warn(e);
+		}
 		
 	}
 
@@ -155,6 +166,11 @@ public class FileImpl extends IFile {
 	@Override
 	public InputStream getInputStream() {
 		// TODO Auto-generated method stub
+		try {
+			return file.getContents();
+		} catch (CoreException e) {
+			Flog.warn(e);
+		}
 		return null;
 	}
 

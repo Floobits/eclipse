@@ -2,10 +2,13 @@ package floobits.impl;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.DocumentRewriteSession;
 import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import floobits.common.Constants;
 import floobits.common.dmp.FlooPatchPosition;
@@ -19,11 +22,24 @@ public class DocImpl extends IDoc {
 	private IContext context;
 	private IDocumentExtension4 doc;
 	public long lastModified = 0;
+	private IDocumentProvider provider;
+	private org.eclipse.core.resources.IFile eFile;
 	
-	public DocImpl(IContext context, IDocumentExtension4 doc) {
+	public DocImpl(IContext context, org.eclipse.core.resources.IFile eFile) throws CoreException {
 		this.context = context;
-		this.doc = doc;
+		this.eFile = eFile;
+		provider = new TextFileDocumentProvider();
+		provider.connect(eFile);
+        doc = (IDocumentExtension4) provider.getDocument(eFile);
 	}
+	
+	public void cleanup() {
+		if (provider != null) {
+			provider.disconnect(eFile);
+		} 
+		provider = null;
+	}
+
 	
 	@Override
 	public void removeHighlight(Integer userId, String path) {
