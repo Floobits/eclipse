@@ -15,5 +15,6 @@ Eclipse-AutoStart: true
 Bundle-ActivationPolicy: lazy;exclude:="floobits-plugin"
 Import-Package: org.eclipse.jface.text,
  org.eclipse.ui.editors.text,
+ org.eclipse.ui.ide,
  org.eclipse.ui.texteditor
 Bundle-ClassPath: .

@@ -106,7 +106,7 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 		if (!(part instanceof ITextEditor)) {
 			return;
 		}
-		ITextEditor editor = (ITextEditor) part;
+//		ITextEditor editor = (ITextEditor) part;
 		
 	}
 

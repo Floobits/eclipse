@@ -3,29 +3,21 @@ package floobits.impl;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.IFileTree;
-import org.eclipse.core.internal.localstore.FileSystemResourceManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.ui.part.IPage;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
-import floobits.common.interfaces.IContext;
 import floobits.common.interfaces.IDoc;
 import floobits.common.interfaces.IFactory;
 import floobits.utilities.Flog;
@@ -101,20 +93,44 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public IDoc getDocument(String relPath) {
-		// TODO Auto-generated method stub
-		return null;
+		org.eclipse.core.resources.IFile file2 = root.getFile(new Path(relPath));
+        try {
+			return new DocImpl(context, file2);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
 	}
 
 	@Override
 	public floobits.common.interfaces.IFile createDirectories(String path) {
-		// TODO Auto-generated method stub
-		return null;
+		IFileStore treeRoot = tree.getTreeRoot();
+		Path path2 = new Path(path);
+		try {
+			path2.makeRelativeTo(new Path(treeRoot.toLocalFile(0, null).getPath()));
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
+		IFileStore child = treeRoot.getFileStore(path2);
+		try {
+			child.mkdir(0, null);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
+		return new FileImpl(context, child);
 	}
 
 	@Override
 	public floobits.common.interfaces.IFile findFileByPath(String path) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		IFileStore treeRoot = tree.getTreeRoot();
+		Path path2 = new Path(path);
+		path2.makeRelativeTo(new Path(path));
+		IFileStore child = treeRoot.getFileStore(path2);
+//		 KANS: the child will always exist :(
+		return new FileImpl(context, child);
 	}
 
 	@Override
@@ -131,14 +147,32 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public boolean openFile(File f) {        
-//		Path ipath = new Path(f.getAbsolutePath());
-//		IFileStore fileLocation = EFS.getLocalFileSystem().getStore(ipath);
-//		FileStoreEditorInput fileStoreEditorInput = new FileStoreEditorInput(
-//		                            fileLocation);
-//		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-//		                            .getActivePage();
-//		page.openEditor(fileStoreEditorInput, FormEditor.ID);
-		return false;
+		IFile file = root.getFile(new Path(f.getPath()));
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		try {
+			IDE.openEditor(page, file);
+		} catch (PartInitException e) {
+			Flog.warn(e);
+			return false;
+		}
+		return true;
+//		IProject project = root.getProject("External Files");
+//		if (!project.exists())
+//		    project.create(null);
+//		if (!project.isOpen())
+//		    project.open(null);
+//		Shell shell = window.getShell();
+//		String name = new FileDialog(shell, SWT.OPEN).open();
+//		if (name == null)
+//		    return false;
+//		IPath location = new Path(name);
+//		IFile file = project.getFile(location.lastSegment());
+//		file.createLink(location, IResource.NONE, null);
+//		IWorkbenchPage page = window.getActivePage();
+//		if (page != null)
+//		    page.openEditor(file);
+//		
+//		return true;
 	}
 
 	@Override

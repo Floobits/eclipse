@@ -1,6 +1,7 @@
 package floobits;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
@@ -52,6 +53,8 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		listener.start(activeWorkbenchWindow, iWorkspace);
 	}
 
 	/*
