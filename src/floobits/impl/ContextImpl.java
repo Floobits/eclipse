@@ -16,7 +16,7 @@ import floobits.common.protocol.FlooUser;
 
 public class ContextImpl extends IContext {
 	
-	private IWorkspace workspace;
+	public IWorkspace workspace;
 
 	public ContextImpl(IWorkspace workspace) throws CoreException {
 		this.workspace = workspace;

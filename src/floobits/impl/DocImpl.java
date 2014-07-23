@@ -2,13 +2,16 @@ package floobits.impl;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.DocumentRewriteSession;
 import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProviderExtension;
 
 import floobits.common.Constants;
 import floobits.common.dmp.FlooPatchPosition;
@@ -28,7 +31,7 @@ public class DocImpl extends IDoc {
 	public DocImpl(IContext context, org.eclipse.core.resources.IFile eFile) throws CoreException {
 		this.context = context;
 		this.eFile = eFile;
-		provider = new TextFileDocumentProvider();
+		provider = new FileDocumentProvider();
 		provider.connect(eFile);
         doc = (IDocumentExtension4) provider.getDocument(eFile);
 	}
@@ -57,13 +60,15 @@ public class DocImpl extends IDoc {
 
 	@Override
 	public void save() {
-		// TODO Auto-generated method stub
-		
+		try {
+			provider.saveDocument(null, eFile, (IDocument) doc, true);
+		} catch (CoreException e) {
+			Flog.warn(e);
+		}
 	}
 
 	@Override
 	public String getText() {
-		// TODO Auto-generated method stub
 		return ((IDocument) doc).get();
 	}
 
@@ -76,20 +81,24 @@ public class DocImpl extends IDoc {
 
 	@Override
 	public void setReadOnly(boolean readOnly) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean makeWritable() {
-		// TODO Auto-generated method stub
-		return false;
+		((IDocumentProviderExtension)provider).setCanSaveDocument(eFile);
+		return true;
 	}
 
 	@Override
 	public IFile getVirtualFile() {
-		// TODO Auto-generated method stub
-		return null;
+		IFileStore store;
+		try {
+			store = EFS.getStore(eFile.getLocationURI());
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
+		return new FileImpl(context, store);
 	}
 
 	@Override

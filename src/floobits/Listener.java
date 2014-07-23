@@ -102,6 +102,11 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
+		IWorkbenchPart part = partRef.getPart(false);	
+		if (!(part instanceof ITextEditor)) {
+			return;
+		}
+		ITextEditor editor = (ITextEditor) part;
 		
 	}
 

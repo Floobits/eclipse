@@ -34,16 +34,18 @@ import floobits.utilities.Flog;
 public class FactoryImpl implements IFactory{
 	IFileSystem lfs;
 	IWorkspace workspace;
-	IContext context;
+	ContextImpl context;
 	public IFileTree tree;
+	IWorkspaceRoot root;
 	
-	public FactoryImpl(IWorkspace workspace, IContext context) throws CoreException {
+	public FactoryImpl(IWorkspace workspace, ContextImpl context) throws CoreException {
 		this.workspace = workspace;
 		this.context = context;
 		lfs = EFS.getLocalFileSystem();
 		IWorkspaceRoot root = workspace.getRoot();
 		IFileStore store = EFS.getStore(root.getLocationURI());
-		tree = lfs.fetchFileTree(store, null); 	
+		tree = lfs.fetchFileTree(store, null);
+		root = workspace.getRoot();
 	}
 	
 	public IFileInfo getInfo(org.eclipse.core.resources.IFile file) {
@@ -79,16 +81,22 @@ public class FactoryImpl implements IFactory{
 	@Override
 	public floobits.common.interfaces.IFile findFileByIoFile(File file) {
 		// TODO Auto-generated method stub
-		IFileStore localFile = lfs.fromLocalFile(file);
-		org.eclipse.core.resources.IFile eFile = getEFile(localFile);
-		return new FileImpl(context, eFile);
+		IFileStore store = lfs.getStore(new Path(file.getPath()));
+		if (store == null) {
+			return null;
+		}
+		return new FileImpl(context, store);
 	}
 
 	@Override
 	public IDoc getDocument(floobits.common.interfaces.IFile file) {
-		// TODO Auto-generated method stub
-		org.eclipse.core.resources.IFile eFile = ((FileImpl) file).file;
-        return new DocImpl(context, eFile);
+		org.eclipse.core.resources.IFile file2 = root.getFile(new Path(file.getPath()));
+        try {
+			return new DocImpl(context, file2);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return null;
+		}
 	}
 
 	@Override
@@ -123,13 +131,13 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public boolean openFile(File f) {        
-		Path ipath = new Path(f.getAbsolutePath());
-		IFileStore fileLocation = EFS.getLocalFileSystem().getStore(ipath);
-		FileStoreEditorInput fileStoreEditorInput = new FileStoreEditorInput(
-		                            fileLocation);
-		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-		                            .getActivePage();
-		page.openEditor(fileStoreEditorInput, FormEditor.ID);
+//		Path ipath = new Path(f.getAbsolutePath());
+//		IFileStore fileLocation = EFS.getLocalFileSystem().getStore(ipath);
+//		FileStoreEditorInput fileStoreEditorInput = new FileStoreEditorInput(
+//		                            fileLocation);
+//		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+//		                            .getActivePage();
+//		page.openEditor(fileStoreEditorInput, FormEditor.ID);
 		return false;
 	}
 
