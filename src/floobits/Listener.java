@@ -96,7 +96,7 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 			         }
 			         Flog.log("%s\n%s\n%s", delta.getFullPath(), delta.getProjectRelativePath(), delta.getResource().getName());
 			         IFileStore store = EFS.getStore(delta.getResource().getLocationURI());
-			         Flog.log("%s\n%s\n%s\n%s", store.fetchInfo().toString(), store.toURI(), store.toString());
+			         Flog.log("%s\n%s", store.fetchInfo().toString(), store.toString());
 			         
 //			         log(Status.INFO, String.format("%s %s %s", delta.getResource().getName(), delta.getKind(), delta.getFullPath()));
 			     return true;

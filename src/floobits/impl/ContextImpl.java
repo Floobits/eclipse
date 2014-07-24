@@ -13,6 +13,7 @@ import floobits.common.Ignore;
 import floobits.common.RunLater;
 import floobits.common.interfaces.IContext;
 import floobits.common.protocol.FlooUser;
+import floobits.utilities.Flog;
 
 public class ContextImpl extends IContext {
 	
@@ -50,25 +51,25 @@ public class ContextImpl extends IContext {
 
 	@Override
 	public void flashMessage(String message) {
-		// TODO Auto-generated method stub
+		Flog.log("%s", message);
 		
 	}
 
 	@Override
 	public void warnMessage(String message) {
-		// TODO Auto-generated method stub
+		Flog.warn(message);
 		
 	}
 
 	@Override
 	public void statusMessage(String message) {
-		// TODO Auto-generated method stub
+		Flog.log("%s", message);
 		
 	}
 
 	@Override
 	public void errorMessage(String message) {
-		// TODO Auto-generated method stub
+		Flog.warn(message);
 		
 	}
 
@@ -104,19 +105,19 @@ public class ContextImpl extends IContext {
 
 	@Override
 	public void mainThread(Runnable runnable) {
-		// TODO Auto-generated method stub
+		runnable.run();
 		
 	}
 
 	@Override
 	public void readThread(Runnable runnable) {
-		// TODO Auto-generated method stub
+		runnable.run();
 		
 	}
 
 	@Override
 	public void writeThread(Runnable runnable) {
-		// TODO Auto-generated method stub
+		runnable.run();
 		
 	}
 

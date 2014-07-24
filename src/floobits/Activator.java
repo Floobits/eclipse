@@ -62,7 +62,7 @@ public class Activator extends AbstractUIPlugin {
 		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		listener.start(activeWorkbenchWindow, iWorkspace);
 		this.context = new ContextImpl(iWorkspace);
-//		this.context.joinWorkspace(new FlooUrl("floobits.com/kansface/asdf"), "", false);
+		this.context.joinWorkspace(new FlooUrl("https://floobits.com/kansface/asdf"), "/Users/kans/Documents/runtime-EclipseApplication/asdfasdasfasf/src", false);
 	}
 
 	/*
