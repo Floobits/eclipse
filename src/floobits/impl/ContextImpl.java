@@ -4,17 +4,16 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.WorkbenchWindow;
 
+import floobits.Listener;
 import floobits.common.EditorEventHandler;
 import floobits.common.Ignore;
 import floobits.common.RunLater;
@@ -25,6 +24,7 @@ import floobits.utilities.Flog;
 public class ContextImpl extends IContext {
 	
 	public IWorkspace workspace;
+	private Listener listener = new Listener(this);
 
 	public ContextImpl(IWorkspace workspace) throws CoreException {
 		this.workspace = workspace;
@@ -72,17 +72,24 @@ public class ContextImpl extends IContext {
 	public void statusMessage(final String message) {
         Display.getDefault().syncExec(new Runnable() {
             public void run() {
-                IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                WorkbenchWindow w = (WorkbenchWindow) window;
-                w.getStatusLineManager().setMessage(message);
+            	Flog.log("%s", message);
+//                IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+//                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(BatchView.ID);
+//                window.getActivePage().findView(null).getgetViewSite().getActionBars().getStatusLineManager();
+////                WorkbenchWindow w = (WorkbenchWindow) window
+//                w.getStatusLineManager().setMessage(message);
             }
         });
 	}
 
 	@Override
-	public void errorMessage(String message) {
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		MessageDialog.openQuestion(shell, "Warning", message);
+	public void errorMessage(final String message) {
+        Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				MessageDialog.openQuestion(shell, "Warning", message);
+            }
+        });
 	}
 
 	@Override
@@ -99,8 +106,7 @@ public class ContextImpl extends IContext {
 
 	@Override
 	public void listenToEditor(EditorEventHandler editorEventHandler) {
-		// TODO Auto-generated method stub
-		
+		listener.start(workspace, editorEventHandler);	
 	}
 
 	@Override
@@ -111,33 +117,34 @@ public class ContextImpl extends IContext {
 
 	@Override
 	public void setListener(boolean b) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override
 	public void mainThread(Runnable runnable) {
-		runnable.run();
-		
+		Display.getDefault().asyncExec(runnable);
 	}
 
 	@Override
 	public void readThread(Runnable runnable) {
-		runnable.run();
-		
+		mainThread(runnable);
 	}
 
 	@Override
 	public void writeThread(Runnable runnable) {
-		runnable.run();
-		
+		mainThread(runnable);
 	}
 
 	@Override
-	public void dialog(String title, String body, RunLater<Boolean> runLater) {
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		boolean yes = MessageDialog.openQuestion(shell, title, body);
-		runLater.run(yes);
+	public void dialog(final String title, final String body, final RunLater<Boolean> runLater) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				boolean yes = MessageDialog.openQuestion(shell, title, body);
+				runLater.run(yes);
+			}
+		});
 	}
 
 	@Override

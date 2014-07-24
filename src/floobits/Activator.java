@@ -34,7 +34,6 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	public static IWorkspace iWorkspace;
-	private static Listener listener = new Listener();
 	public static Activator slef;
 	public ContextImpl context;
 	
@@ -59,8 +58,6 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		listener.start(activeWorkbenchWindow, iWorkspace);
 		this.context = new ContextImpl(iWorkspace);
 		this.context.joinWorkspace(new FlooUrl("https://floobits.com/kansface/asdf"), "/Users/kans/Documents/runtime-EclipseApplication/asdfasdasfasf/src", false);
 	}
