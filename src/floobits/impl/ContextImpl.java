@@ -7,6 +7,13 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.WorkbenchWindow;
 
 import floobits.common.EditorEventHandler;
 import floobits.common.Ignore;
@@ -62,15 +69,20 @@ public class ContextImpl extends IContext {
 	}
 
 	@Override
-	public void statusMessage(String message) {
-		Flog.log("%s", message);
-		
+	public void statusMessage(final String message) {
+        Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+                IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                WorkbenchWindow w = (WorkbenchWindow) window;
+                w.getStatusLineManager().setMessage(message);
+            }
+        });
 	}
 
 	@Override
 	public void errorMessage(String message) {
-		Flog.warn(message);
-		
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		MessageDialog.openQuestion(shell, "Warning", message);
 	}
 
 	@Override
@@ -123,8 +135,9 @@ public class ContextImpl extends IContext {
 
 	@Override
 	public void dialog(String title, String body, RunLater<Boolean> runLater) {
-		// TODO Auto-generated method stub
-		
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		boolean yes = MessageDialog.openQuestion(shell, title, body);
+		runLater.run(yes);
 	}
 
 	@Override
