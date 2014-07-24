@@ -1,5 +1,7 @@
 package floobits;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -59,7 +61,9 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 			for (IEditorReference editorReference : editorReferences) {
 				IEditorPart editor = editorReference.getEditor(false);
 				IDocument document = getDocument((IEditorPart)editor);
-				if (document != null) document.addDocumentListener(documentListener);
+				if (document != null) {
+					document.addDocumentListener(documentListener);
+				}
 			}
 		}
 	}
@@ -90,7 +94,10 @@ public class Listener implements IResourceChangeListener, IPartListener2 {
 			             // handle changed resource
 			             break;
 			         }
-			         delta.getResource();
+			         Flog.log("%s\n%s\n%s", delta.getFullPath(), delta.getProjectRelativePath(), delta.getResource().getName());
+			         IFileStore store = EFS.getStore(delta.getResource().getLocationURI());
+			         Flog.log("%s\n%s\n%s\n%s", store.fetchInfo().toString(), store.toURI(), store.toString());
+			         
 //			         log(Status.INFO, String.format("%s %s %s", delta.getResource().getName(), delta.getKind(), delta.getFullPath()));
 			     return true;
 				}});

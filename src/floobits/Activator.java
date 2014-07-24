@@ -1,5 +1,7 @@
 package floobits;
 
+import io.fletty.channel.nio.NioEventLoopGroup;
+
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -16,6 +18,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
 import floobits.common.Bootstrap;
+import floobits.common.FlooUrl;
+import floobits.common.protocol.handlers.FlooHandler;
+import floobits.impl.ContextImpl;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -31,6 +36,7 @@ public class Activator extends AbstractUIPlugin {
 	public static IWorkspace iWorkspace;
 	private static Listener listener = new Listener();
 	public static Activator slef;
+	public ContextImpl context;
 	
 	/**
 	 * The constructor
@@ -43,7 +49,7 @@ public class Activator extends AbstractUIPlugin {
 //		Version ecliVersion = eclipse.getVersion();
 		Version flooVersion = FrameworkUtil.getBundle(getClass()).getVersion();
 		Version version = product.getDefiningBundle().getVersion();
-		Bootstrap.bootstrap(product.getName(), Integer.toString(version.getMajor()), Integer.toString(version.getMinor()), String.format("%s-%s", flooVersion.getMajor(), flooVersion.getMinor()));
+//		Bootstrap.bootstrap(product.getName(), Integer.toString(version.getMajor()), Integer.toString(version.getMinor()), String.format("%s-%s", flooVersion.getMajor(), flooVersion.getMinor()));
 	}
 
 	/*
@@ -55,6 +61,8 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		listener.start(activeWorkbenchWindow, iWorkspace);
+		this.context = new ContextImpl(iWorkspace);
+//		this.context.joinWorkspace(new FlooUrl("floobits.com/kansface/asdf"), "", false);
 	}
 
 	/*
