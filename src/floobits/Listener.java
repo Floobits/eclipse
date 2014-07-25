@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.filesystem.EFS;
-
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -24,13 +23,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -49,66 +48,85 @@ public class Listener {
 		this.context = context;
 		this.self = this;
 	}
-	private IDocumentListener documentListener = new IDocumentListener() {
-
-		@Override
-		public void documentAboutToBeChanged(DocumentEvent event) {
-			Flog.log(String.format("%s, ", event));
-			
-		}
-
-		@Override
-		public void documentChanged(DocumentEvent event) {
-			Flog.log(String.format("%s, ", event));	
-		}
-	};
-	
-	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
-		
-		@Override
-		public void selectionChanged(final SelectionChangedEvent event) {
-			if (self.isListening.get()) {
-				return;
-			}
-			if (!(event.getSelection() instanceof ITextSelection)) {
-				return;
-			}
-			final ITextSelection textSelection = (ITextSelection) event.getSelection();
-			event.getSource();
-	        ArrayList<ArrayList<Integer>> range = new ArrayList<ArrayList<Integer>>();
-	        int offset = textSelection.getOffset();
-	        range.add(new ArrayList<Integer>(Arrays.asList(offset, offset+textSelection.getLength())));
-	        
-	        IFileStore store = EFS.getStore(delta.getResource().getLocationURI());
-			self.editorEventHandler.changeSelection(path, range, false);
-		}
-	};
 	
 	private class DocumentListenerManager {
 		private Listener listener;
 		IEditorPart editor;
-		
-		public DocumentListenerManager(IEditorPart editor) {
+		public DocumentListenerManager(Listener listener, IEditorPart editor) {
 			this.editor = editor;
+			this.listener = listener;
+		}
+		
+		private IPostSelectionProvider getProvider() {
+			ITextEditor textEditor = (ITextEditor) editor.getAdapter(ITextEditor.class);
+			ISelectionProvider selectionProvider = textEditor.getSelectionProvider();
+			if (selectionProvider instanceof IPostSelectionProvider) {
+				return (IPostSelectionProvider) selectionProvider;
+			}
+			return null;
+		}
+		
+		private String getPath() {
+			return ((FileEditorInput)editor.getEditorInput()).getPath().toString();
 		}
 		
 		public void start() {
+			
+			if (!(editor.getEditorInput() instanceof FileEditorInput)) {
+				return;
+			}
+			
 			IDocument document = getDocument(editor);
 			if (document == null) {
 				return;
 			}
 			document.addDocumentListener(documentListener);
-			ITextEditor textEditor = (ITextEditor) editor.getAdapter(ITextEditor.class);
-			ISelectionProvider selectionProvider = textEditor.getSelectionProvider();
-			if (selectionProvider instanceof IPostSelectionProvider) {
-				((IPostSelectionProvider) selectionProvider).addPostSelectionChangedListener(selectionListener);
+			IPostSelectionProvider selectionProvider = getProvider();
+			if (selectionProvider != null) {
+				selectionProvider.addPostSelectionChangedListener(selectionListener);
 			}
 			map.put(editor, this);
 		}
+		private IDocumentListener documentListener = new IDocumentListener() {
 
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent event) {
+				Flog.log(String.format("%s, ", event));
+				
+			}
+
+			@Override
+			public void documentChanged(DocumentEvent event) {
+				Flog.log(String.format("%s, ", event));	
+			}
+		};
+		
+		private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(final SelectionChangedEvent event) {
+				if (listener.isListening.get()) {
+					return;
+				}
+				if (!(event.getSelection() instanceof ITextSelection)) {
+					return;
+				}
+				final ITextSelection textSelection = (ITextSelection) event.getSelection();
+				event.getSource();
+		        ArrayList<ArrayList<Integer>> range = new ArrayList<ArrayList<Integer>>();
+		        int offset = textSelection.getOffset();
+		        range.add(new ArrayList<Integer>(Arrays.asList(offset, offset+textSelection.getLength())));
+				listener.editorEventHandler.changeSelection(getPath(), range, false);
+			}
+		};
+		
 		public void stop() {
 			IDocument doc = getDocument(editor);
 			doc.removeDocumentListener(documentListener);
+			IPostSelectionProvider selectionProvider = getProvider();
+			if (selectionProvider != null) {
+				selectionProvider.removePostSelectionChangedListener(selectionListener);
+			}
 		}
 	}
 	
@@ -200,7 +218,7 @@ public class Listener {
 			if (documentListener != null) {
 				return;
 			}
-			DocumentListenerManager dl = new DocumentListenerManager(editor);
+			DocumentListenerManager dl = new DocumentListenerManager(self, editor);
 			dl.start();
 		}
 
@@ -233,7 +251,7 @@ public class Listener {
 			IEditorReference[] editorReferences = page.getEditorReferences();
 			for (IEditorReference editorReference : editorReferences) {
 				IEditorPart editor = editorReference.getEditor(false);
-				DocumentListenerManager dl = new DocumentListenerManager(editor);
+				DocumentListenerManager dl = new DocumentListenerManager(this, editor);
 				dl.start();
 			}
 		}
