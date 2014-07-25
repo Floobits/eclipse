@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -21,6 +22,7 @@ import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
@@ -35,6 +37,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import floobits.common.EditorEventHandler;
 import floobits.impl.ContextImpl;
+import floobits.impl.FactoryImpl;
+import floobits.impl.FileImpl;
 import floobits.utilities.Flog;
 
 
@@ -67,7 +71,8 @@ public class Listener {
 		}
 		
 		private String getPath() {
-			return ((FileEditorInput)editor.getEditorInput()).getPath().toString();
+			String path = ((FileEditorInput)editor.getEditorInput()).getPath().toString();
+			return context.toProjectRelPath(path);
 		}
 		
 		public void start() {
@@ -91,13 +96,17 @@ public class Listener {
 
 			@Override
 			public void documentAboutToBeChanged(DocumentEvent event) {
-				Flog.log(String.format("%s, ", event));
-				
+//				Flog.log(String.format("%s, ", event));	
 			}
 
 			@Override
 			public void documentChanged(DocumentEvent event) {
 				Flog.log(String.format("%s, ", event));	
+				ITextEditor textEditor= (ITextEditor) editor;
+				IEditorInput input = textEditor.getEditorInput();
+				IFile file = ((FileEditorInput) input).getFile();
+				IFileStore fileStore = ((FactoryImpl) context.iFactory).getFileStore(file.getLocationURI());
+				editorEventHandler.change(new FileImpl(context, fileStore));
 			}
 		};
 		
@@ -116,7 +125,7 @@ public class Listener {
 		        ArrayList<ArrayList<Integer>> range = new ArrayList<ArrayList<Integer>>();
 		        int offset = textSelection.getOffset();
 		        range.add(new ArrayList<Integer>(Arrays.asList(offset, offset+textSelection.getLength())));
-				listener.editorEventHandler.changeSelection(getPath(), range, false);
+				editorEventHandler.changeSelection(getPath(), range, false);
 			}
 		};
 		

@@ -59,7 +59,8 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		this.context = new ContextImpl(iWorkspace);
-		this.context.joinWorkspace(new FlooUrl("https://floobits.com/kansface/asdf"), "/Users/kans/Documents/runtime-EclipseApplication/asdfasdasfasf/src", false);
+		String path = ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toString();
+		this.context.joinWorkspace(new FlooUrl("https://floobits.com/kansface/asdf"), path, false);
 	}
 
 	/*
@@ -68,7 +69,6 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		listener.stop(iWorkspace);
 		iWorkspace = null;
 		super.stop(context);
 	}

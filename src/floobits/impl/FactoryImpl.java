@@ -1,6 +1,7 @@
 package floobits.impl;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.eclipse.core.filesystem.EFS;
@@ -48,6 +49,10 @@ public class FactoryImpl implements IFactory{
 		return tree.getFileInfo(store);
 	}
 	
+	public IFileStore getFileStore(URI uri) {
+		return lfs.getStore(uri);
+	}
+
 	private org.eclipse.core.resources.IFile[] filterNonExistentFiles(org.eclipse.core.resources.IFile[] files) {
 		if (files == null)
 			return null;

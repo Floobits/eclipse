@@ -199,7 +199,12 @@ public class Utils {
     }
 
     static class PathResolutionException extends RuntimeException {
-        PathResolutionException (String msg) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 7336143689208470125L;
+
+		PathResolutionException (String msg) {
             super(msg);
         }
     }
