@@ -85,7 +85,7 @@ public class ContextImpl extends IContext {
         Display.getDefault().syncExec(new Runnable() {
             public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				MessageDialog.openQuestion(shell, "Warning", message);
+				MessageDialog.openError(shell, "Floobits Error", message);
             }
         });
 	}

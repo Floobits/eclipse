@@ -70,7 +70,7 @@ public class EditorEventHandler {
         }
         outbound.renameBuf(buf, newRelativePath);
     }
-
+    
     public void change(IFile file) {
         String filePath = file.getPath();
         if (!state.can("patch")) {
