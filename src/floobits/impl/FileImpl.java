@@ -118,13 +118,15 @@ public class FileImpl extends IFile {
 			childStores = file.childStores(0, null);
 		} catch (CoreException e) {
 			Flog.warn(e);
-			return (IFile[]) list.toArray();
+			return new IFile[0];
 		}
 		for (IFileStore fileStore : childStores) {
 			FileImpl fileImpl = new FileImpl(context, fileStore);
-			list.add(fileImpl);
+			list.add((IFile)fileImpl);
 		}
-		return (IFile[]) list.toArray();
+		IFile[] files = new IFile[list.size()];
+		list.toArray(files);
+		return files;
 	}
 
 	@Override
