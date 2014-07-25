@@ -8,7 +8,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.IFileSystem;
-import org.eclipse.core.filesystem.IFileTree;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -28,25 +27,24 @@ public class FactoryImpl implements IFactory{
 	IFileSystem lfs;
 	IWorkspace workspace;
 	ContextImpl context;
-	public IFileTree tree;
 	IWorkspaceRoot root;
+	IFileStore store;
 	
 	public FactoryImpl(IWorkspace workspace, ContextImpl context) throws CoreException {
 		this.workspace = workspace;
 		this.context = context;
 		lfs = EFS.getLocalFileSystem();
 		IWorkspaceRoot root = workspace.getRoot();
-		IFileStore store = EFS.getStore(root.getLocationURI());
-		tree = lfs.fetchFileTree(store, null);
+		store = EFS.getStore(root.getLocationURI());
 		root = workspace.getRoot();
 	}
 	
 	public IFileInfo getInfo(org.eclipse.core.resources.IFile file) {
-		IFileStore store = lfs.getStore(file.getLocationURI());
-		if (store == null) {
+		IFileStore _store = lfs.getStore(file.getLocationURI());
+		if (_store == null) {
 			return null;
 		}
-		return tree.getFileInfo(store);
+		return _store.fetchInfo();
 	}
 	
 	public IFileStore getFileStore(URI uri) {
@@ -109,15 +107,9 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public floobits.common.interfaces.IFile createDirectories(String path) {
-		IFileStore treeRoot = tree.getTreeRoot();
 		Path path2 = new Path(path);
-		try {
-			path2.makeRelativeTo(new Path(treeRoot.toLocalFile(0, null).getPath()));
-		} catch (CoreException e) {
-			Flog.warn(e);
-			return null;
-		}
-		IFileStore child = treeRoot.getFileStore(path2);
+		path2.makeRelativeTo(new Path(context.colabDir));
+		IFileStore child = store.getFileStore(path2);
 		try {
 			child.mkdir(0, null);
 		} catch (CoreException e) {
@@ -129,12 +121,16 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public floobits.common.interfaces.IFile findFileByPath(String path) {
-		
-		IFileStore treeRoot = tree.getTreeRoot();
 		Path path2 = new Path(path);
-		path2.makeRelativeTo(new Path(path));
-		IFileStore child = treeRoot.getFileStore(path2);
-//		 KANS: the child will always exist :(
+		path2.makeRelativeTo(new Path(context.colabDir));
+		IFileStore child = store.getFileStore(path2);
+		try {
+			if (!child.toLocalFile(0, null).exists()) {
+				return null;
+			}
+		} catch (CoreException e) {
+			return null;
+		}
 		return new FileImpl(context, child);
 	}
 
@@ -151,7 +147,8 @@ public class FactoryImpl implements IFactory{
 	}
 
 	@Override
-	public boolean openFile(File f) {        
+	public boolean openFile(File f) {     
+//		#TODO: probably needs to be relative
 		IFile file = root.getFile(new Path(f.getPath()));
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		try {
