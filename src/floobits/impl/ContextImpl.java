@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JDialog;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -12,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import floobits.Listener;
+import floobits.ResolveConflicts;
 import floobits.common.EditorEventHandler;
 import floobits.common.Ignore;
 import floobits.common.RunLater;
@@ -167,7 +171,9 @@ public class ContextImpl extends IContext {
 	public void dialogResolveConflicts(Runnable stompLocal,
 			Runnable stompRemote, boolean readOnly, Runnable flee,
 			String[] conflictedPathsArray) {
-		// TODO Auto-generated method stub
+		ResolveConflicts dialog = new ResolveConflicts(conflictedPathsArray);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
 		
 	}
 
