@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JDialog;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -15,7 +13,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import floobits.Listener;
-import floobits.ResolveConflicts;
 import floobits.common.EditorEventHandler;
 import floobits.common.Ignore;
 import floobits.common.RunLater;
@@ -168,12 +165,25 @@ public class ContextImpl extends IContext {
 	}
 
 	@Override
-	public void dialogResolveConflicts(Runnable stompLocal,
-			Runnable stompRemote, boolean readOnly, Runnable flee,
-			String[] conflictedPathsArray) {
-		ResolveConflicts dialog = new ResolveConflicts(conflictedPathsArray);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		dialog.setVisible(true);
+	public void dialogResolveConflicts(final Runnable stompLocal, final Runnable stompRemote, boolean readOnly, final Runnable flee, final String[] conflictedPathsArray) {
+		mainThread(new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				ResolveConflicts dialog = new ResolveConflicts(shell, conflictedPathsArray);
+				switch (dialog.getExitCode()) {
+					case CANCEL:
+						flee.run();
+						return;
+					case LOCAL:
+						stompLocal.run();
+						return;
+					case REMOTE:
+						stompRemote.run();
+						return;
+				}				
+			}
+		});
 		
 	}
 
