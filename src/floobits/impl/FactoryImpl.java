@@ -34,9 +34,8 @@ public class FactoryImpl implements IFactory{
 		this.workspace = workspace;
 		this.context = context;
 		lfs = EFS.getLocalFileSystem();
-		IWorkspaceRoot root = workspace.getRoot();
-		store = EFS.getStore(root.getLocationURI());
 		root = workspace.getRoot();
+		store = EFS.getStore(root.getLocationURI());
 	}
 	
 	public IFileInfo getInfo(org.eclipse.core.resources.IFile file) {
@@ -124,13 +123,6 @@ public class FactoryImpl implements IFactory{
 		Path path2 = new Path(path);
 		path2.makeRelativeTo(new Path(context.colabDir));
 		IFileStore child = store.getFileStore(path2);
-		try {
-			if (!child.toLocalFile(0, null).exists()) {
-				return null;
-			}
-		} catch (CoreException e) {
-			return null;
-		}
 		return new FileImpl(context, child);
 	}
 
