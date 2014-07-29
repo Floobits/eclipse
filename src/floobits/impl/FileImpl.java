@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import floobits.common.interfaces.IContext;
 import floobits.common.interfaces.IFile;
@@ -194,8 +195,15 @@ public class FileImpl extends IFile {
 	@Override
 	public boolean setBytes(byte[] bytes) {
 		ByteArrayInputStream io = new ByteArrayInputStream(bytes);
+		OutputStream outputStream;
 		try {
-			IOUtils.copy(io, file.openOutputStream(0, null));
+			outputStream = file.openOutputStream(0, null);
+		} catch (CoreException e1) {
+			Flog.warn(e1);
+			return false;
+		}
+		try {
+			IOUtils.copy(io, outputStream); 
 		} catch (Throwable e) {
 			Flog.warn(e);
 			return false;

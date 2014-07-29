@@ -10,6 +10,7 @@ import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension;
 
@@ -31,7 +32,7 @@ public class DocImpl extends IDoc {
 	public DocImpl(IContext context, org.eclipse.core.resources.IFile eFile) throws CoreException {
 		this.context = context;
 		this.eFile = eFile;
-		provider = new FileDocumentProvider();
+		provider = new TextFileDocumentProvider();
 		provider.connect(eFile);
         doc = (IDocumentExtension4) provider.getDocument(eFile);
 	}
