@@ -2,13 +2,9 @@ package floobits.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import floobits.common.interfaces.IContext;
-import floobits.common.interfaces.IFile;
-import floobits.utilities.Flog;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.filebuffers.IFileBuffer;
@@ -17,6 +13,10 @@ import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+
+import floobits.common.interfaces.IContext;
+import floobits.common.interfaces.IFile;
+import floobits.utilities.Flog;
 
 public class FileImpl extends IFile {
 	public IFileStore file;

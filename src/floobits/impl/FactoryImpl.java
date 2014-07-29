@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -29,6 +30,7 @@ public class FactoryImpl implements IFactory{
 	ContextImpl context;
 	IWorkspaceRoot root;
 	IFileStore store;
+	Path path;
 	
 	public FactoryImpl(IWorkspace workspace, ContextImpl context) throws CoreException {
 		this.workspace = workspace;
@@ -85,6 +87,7 @@ public class FactoryImpl implements IFactory{
 	@Override
 	public IDoc getDocument(floobits.common.interfaces.IFile file) {
 		org.eclipse.core.resources.IFile file2 = root.getFile(new Path(file.getPath()));
+		Flog.log("%s", file2.getFullPath());
         try {
 			return new DocImpl(context, file2);
 		} catch (CoreException e) {
@@ -107,7 +110,6 @@ public class FactoryImpl implements IFactory{
 	@Override
 	public floobits.common.interfaces.IFile createDirectories(String path) {
 		Path path2 = new Path(path);
-		path2.makeRelativeTo(new Path(context.colabDir));
 		IFileStore child = store.getFileStore(path2);
 		try {
 			child.mkdir(0, null);
@@ -120,8 +122,7 @@ public class FactoryImpl implements IFactory{
 
 	@Override
 	public floobits.common.interfaces.IFile findFileByPath(String path) {
-		Path path2 = new Path(path);
-		path2.makeRelativeTo(new Path(context.colabDir));
+		IPath path2 = new Path(path).makeRelativeTo(context.path);
 		IFileStore child = store.getFileStore(path2);
 		return new FileImpl(context, child);
 	}

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -24,6 +25,14 @@ public class ContextImpl extends IContext {
 	
 	public IWorkspace workspace;
 	private Listener listener = new Listener(this);
+	public Path path;
+
+	@Override
+	public void setColabDir(String colabDir) {
+		// TODO Auto-generated method stub
+		super.setColabDir(colabDir);
+		this.path = new Path(colabDir);
+	}
 
 	public ContextImpl(IWorkspace workspace) throws CoreException {
 		this.workspace = workspace;

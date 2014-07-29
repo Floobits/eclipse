@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.DocumentRewriteSession;
 import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension;
@@ -33,6 +33,11 @@ public class DocImpl extends IDoc {
 		this.context = context;
 		this.eFile = eFile;
 		provider = new TextFileDocumentProvider();
+		IPath location = eFile.getLocation();
+		IPath fullPath = eFile.getFullPath();
+		if (!eFile.exists()) {
+
+		}
 		provider.connect(eFile);
         doc = (IDocumentExtension4) provider.getDocument(eFile);
 	}
