@@ -11,7 +11,6 @@ import floobits.common.interfaces.IFile;
 import floobits.utilities.Flog;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
@@ -27,7 +26,6 @@ public class FileImpl extends IFile {
 	public FileImpl(IContext context, IFileStore file) {
 		this.file = file;
 		this.context = context;
-		FileBuffers.getTextFileBufferManager();
 	}
 	
 	public IFileInfo getInfo() {
@@ -144,12 +142,7 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean exists() {
-		try {
-			return file.toLocalFile(0, null).exists();
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			return false;
-		}
+		return file.fetchInfo().exists();
 	}
 
 	@Override
@@ -176,16 +169,11 @@ public class FileImpl extends IFile {
 	@Override
 	public byte[] getBytes() {
 		InputStream in;
-		try {
-			in = file.openInputStream(0, null);
-		} catch (CoreException e) {
-			Flog.warn(e);
-			return null;
-		}
 		byte[] bytes = null;
 		try {
+			in = file.openInputStream(0, null);
 			bytes = IOUtils.toByteArray(in);
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			Flog.warn(e);
 			return null;
 		}
@@ -194,16 +182,18 @@ public class FileImpl extends IFile {
 
 	@Override
 	public boolean setBytes(byte[] bytes) {
+		if (!exists()) {
+			try {
+				file.getParent().mkdir(0, null);
+			} catch (CoreException e) {
+				Flog.warn(e);
+			}
+		}
 		ByteArrayInputStream io = new ByteArrayInputStream(bytes);
 		OutputStream outputStream;
 		try {
 			outputStream = file.openOutputStream(0, null);
-		} catch (CoreException e1) {
-			Flog.warn(e1);
-			return false;
-		}
-		try {
-			IOUtils.copy(io, outputStream); 
+			IOUtils.copy(io, outputStream);
 		} catch (Throwable e) {
 			Flog.warn(e);
 			return false;
