@@ -32,14 +32,33 @@ public class DocImpl extends IDoc {
 	public DocImpl(IContext context, org.eclipse.core.resources.IFile eFile) throws CoreException {
 		this.context = context;
 		this.eFile = eFile;
-		provider = new TextFileDocumentProvider();
-		IPath location = eFile.getLocation();
-		IPath fullPath = eFile.getFullPath();
-		if (!eFile.exists()) {
-
+	}
+	
+	private boolean connect() {
+		if (doc != null) {
+			return true;
 		}
-		provider.connect(eFile);
+		if (!eFile.exists()) {
+			try {
+				IPath fullPath = eFile.getParent().getFullPath();
+				String relPath = context.toProjectRelPath(fullPath.toString());
+				context.iFactory.createDirectories(relPath);
+				eFile.getParent().refreshLocal(1, null);
+				eFile.refreshLocal(0, null);
+				eFile.create(null, 0, null);
+			} catch (Throwable e) {
+				Flog.warn(e);
+			}
+		}
+		provider = new TextFileDocumentProvider();
+		try {
+			provider.connect(eFile);
+		} catch (CoreException e) {
+			Flog.warn(e);
+			return false;
+		}
         doc = (IDocumentExtension4) provider.getDocument(eFile);
+        return true;
 	}
 	
 	public void cleanup() {
@@ -66,22 +85,35 @@ public class DocImpl extends IDoc {
 
 	@Override
 	public void save() {
+		if (!connect()) {
+			return;
+		}
 		try {
 			provider.saveDocument(null, eFile, (IDocument) doc, true);
 		} catch (CoreException e) {
 			Flog.warn(e);
 		}
+		cleanup();
 	}
 
 	@Override
 	public String getText() {
-		return ((IDocument) doc).get();
+		if (!connect()) {
+			return "";
+		}
+		String text = ((IDocument) doc).get();
+		cleanup();
+		return text;
 	}
 
 	@Override
 	public void setText(String text) {
+		if (!connect()) {
+			return;
+		}
 		lastModified = System.currentTimeMillis();
 		doc.set(text, lastModified);
+		cleanup();
 		
 	}
 
@@ -91,7 +123,9 @@ public class DocImpl extends IDoc {
 
 	@Override
 	public boolean makeWritable() {
+		connect();
 		((IDocumentProviderExtension)provider).setCanSaveDocument(eFile);
+		cleanup();
 		return true;
 	}
 
@@ -119,6 +153,7 @@ public class DocImpl extends IDoc {
 //            ScrollingModel scrollingModel = editor.getScrollingModel();
 //            original.put(scrollingModel, new Integer[]{scrollingModel.getHorizontalScrollOffset(), scrollingModel.getVerticalScrollOffset()});
 //        }
+		connect();
         IDocument document = (IDocument) doc;
         DocumentRewriteSession rewriteSession = doc.startRewriteSession(DocumentRewriteSessionType.UNRESTRICTED);
         lastModified = System.currentTimeMillis();
@@ -147,6 +182,7 @@ public class DocImpl extends IDoc {
 //            model.scrollHorizontally(offsets[0]);
 //            model.scrollVertically(offsets[1]);
 //        }
+        cleanup();
         return text;
 	}
 
